@@ -4,5 +4,7 @@ require "tic_tac_toe_ai/computer_player"
 require "tic_tac_toe_ai/minimax"
 
 module TicTacToeAi
-  # Your code goes here...
+  def self.create_board
+    Board.new
+  end
 end
