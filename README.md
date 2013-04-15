@@ -6,20 +6,9 @@ This is a tic-tac-toe backend that can be used with different user interfaces.
 
 Add this line to your application's Gemfile:
 
-    gem 'tic_tac_toe_ai'
+    gem 'tic_tac_toe_ai', git: "git://github.com/bubbles90210/tic_tac_toe_ai.git"
 
 And then execute:
 
-    $ bundle
+    $ bundle install
 
-Or install it yourself as:
-
-    $ gem install tic_tac_toe_ai
-
-## Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
