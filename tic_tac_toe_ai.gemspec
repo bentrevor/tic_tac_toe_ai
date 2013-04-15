@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = TicTacToeAi::VERSION
   spec.authors       = ["Ben Trevor"]
   spec.email         = ["benjamin.trevor@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{This is a tic-tac-toe ai that uses the minimax algorithm.}
+  spec.summary       = %q{UI-agnostic tic-tac-toe}
   spec.homepage      = ""
   spec.license       = "MIT"
 
