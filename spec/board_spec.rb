@@ -5,91 +5,98 @@ describe Board do
   let(:board) { Board.new }
   let(:player_1) { mock(char: 'x') }
   let(:player_2) { mock(char: 'o') }
-  let(:fake_game) { mock.as_null_object }
+  let(:observer) { mock.as_null_object }
 
   before :each do
-    board.add_observer fake_game
+    board.add_observer observer
   end
 
-  context 'observers' do
-    describe '#add_observer' do
-      it "should add an observer to board.observers" do
-        expect {board.add_observer(fake_game)}.to change{board.observers.length}.by 1
-      end
+  it "can add an observer to board.observers" do
+    expect {board.add_observer(observer)}.to change{board.observers.length}.by 1
+end
+
+  it "can send a message to each observer" do
+    board.observers = [observer, mock, mock]
+    board.observers.each do |observer|
+      observer.should_receive :continue
     end
 
-    describe '#notify_observers' do
-      it "should send a message to each observer" do
-        board.observers = [fake_game, mock, mock]
-        assert_notification :continue
-        board.update_state
-      end
+    board.update_state
+  end
 
-      it "only sends the board when the notification is :game_over" do
-        fake_game.should_receive(:continue).with()
-        place_many [0,1], [3,4]
-        board.update_state
-
-        fake_game.should_receive(:game_over).with(board)
-        board.place 2
-        board.update_state
-      end
-    end
+  it "can count the number of empty spaces" do
+    board.empty_spaces.should be 9
+    board.place 1
+    board.place 2
+    board.empty_spaces.should be 7
+    board.place 3
+    board.place 4
+    board.empty_spaces.should be 5
   end
 
   context 'state' do
-    describe '#state_allows_move?' do
-      it "should return true for a valid move" do
-        board.state_allows_move?('x', 0).should be true
+    it "allows a move to an available position" do
+      (0..8).each do |position|
+        board.state_allows_move?('x', position).should be true
       end
+    end
 
-      it "should return false for a non-available square" do
-        board = Board.new ['x',nil,nil,nil,nil,nil,nil,nil,nil]
-        board.state_allows_move?('o', 0).should be false
-      end
+    it "doesn't allow move to occupied position" do
+      board = Board.new ['x',nil,nil,
+                         nil,nil,nil,
+                         nil,nil,nil]
 
-      it "should return false for positions > 8" do
-        board.state_allows_move?('x', 9).should be false
-      end
+      board.state_allows_move?('o', 0).should be false
+    end
 
-      it "should return false for positions < 0" do
-        board.state_allows_move?('x', -1).should be false
-      end
+    it "doesn't allow move to position > 8" do
+      board.state_allows_move?('x', 9).should be false
+    end
+
+    it "doesn't allow move to position < 0" do
+      board.state_allows_move?('x', -1).should be false
+    end
+
+    it "doesn't allow a move by the wrong player" do
+      board.state_allows_move?('o', 0).should be false
     end
   end
 
   describe 'notifications' do
-    it "sends the board with :game_over" do
+    it "sends :x_wins when x wins" do
       place_many [0,1,2], [3,4]
-      board.observers[0].should_receive(:game_over).with(board)
+      observer.should_receive :x_wins
+      observer.should_not_receive :o_wins
+      observer.should_not_receive :tie_game
+
       board.update_state
     end
 
-    it "should send :game_over when 'x' wins" do
-      place_many [0,1,2], [3,4]
-      assert_notification :game_over
+    it "sends :o_wins when o wins" do
+      place_many [3,4,7,8], [0,1,2]
+      observer.should_not_receive :x_wins
+      observer.should_receive :o_wins
+      observer.should_not_receive :tie_game
+
       board.update_state
     end
 
-    it "should send :game_over when 'o' wins" do
-      place_many [0,1,7], [3,4,5]
-      assert_notification :game_over
-      board.update_state
-    end
-
-    it "should send :game_over when the board is full" do
+    it "sends :tie_game when game is tied" do
       place_many [0,2,3,7,8], [1,4,5,6]
-      assert_notification :game_over
+      observer.should_not_receive :o_wins
+      observer.should_not_receive :x_wins
+      observer.should_receive :tie_game
+
       board.update_state
+    end
+
+    it "sends a notification to restart" do
+      observer.should_receive :restart
+      board.try_move 'x', 'restart'
     end
   end
 
   describe '#try_move' do
-    it "should send a notification to restart" do
-      assert_notification :restart
-      board.try_move 'x', 'restart'
-    end
-
     context 'valid move' do
       it "should place an 'x'" do
         assert_try_move_success 'x', "0"
@@ -119,50 +126,39 @@ describe Board do
       end
 
       it "should send a message for unavailable positions" do
-        assert_notification :unavailable_position
+        observer.should_receive :unavailable_position
         board.try_move 'x', "0"
         board.try_move 'o', "0"
       end
 
       it "should send a message for an invalid index" do
-        assert_notification :invalid_position
+        observer.should_receive :invalid_position
         board.try_move 'x', "-1"
       end
 
       it "should send a message for an invalid index" do
-        assert_notification :invalid_position
+        observer.should_receive :invalid_position
         board.try_move 'x', "9"
       end
 
       it "should send a message for incorrect players" do
-        assert_notification :incorrect_player
+        observer.should_receive :incorrect_player
         board.try_move 'x', "0"
         board.try_move 'x', "1"
       end
 
       it 'should send a message for "\n"' do
-        assert_notification :invalid_position
+        observer.should_receive :invalid_position
         board.try_move 'x', ""
       end
 
       it "should send a message for a string other than 'restart'" do
-        assert_notification :invalid_position
+        observer.should_receive :invalid_position
         board.try_move 'x', "hey"
       end
     end
   end
 
-  describe '#empty_spaces' do
-    it "should be able to count the empty spaces" do
-      board.empty_spaces.should be 9
-      board.place 1
-      board.place 2
-      board.empty_spaces.should be 7
-      board.place 3
-      board.place 4
-      board.empty_spaces.should be 5
-    end
-  end
 
   describe '#available?' do
     it "should start as true for all spaces" do
@@ -278,10 +274,6 @@ describe Board do
     end
   end
 
-  def clear_board
-    board.spaces = Array.new 9
-  end
- 
   def assert_try_move_success(player_char, position)
     board.try_move(player_char, position)
     board.spaces[position.to_i].should eq player_char
@@ -290,11 +282,5 @@ describe Board do
   def assert_try_move_failure(player_char, position)
     board.try_move(player_char, position)
     board.spaces[position].should_not eq player_char
-  end
-
-  def assert_notification(notification)
-    board.observers.each do |observer|
-      observer.should_receive notification
-    end
   end
 end

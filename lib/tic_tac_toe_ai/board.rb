@@ -20,17 +20,13 @@ class Board
 
   def notify_observers(notification)
     self.observers.each do |observer|
-      if notification == :game_over
-        observer.send notification, self
-      else
-        observer.send notification
-      end
+      observer.send notification
     end
   end
 
   def update_state
     if game_over?
-      notify_observers :game_over
+      notify_game_over
     else
       notify_observers :continue
     end
@@ -120,5 +116,15 @@ class Board
 
   def wrong_player?(char)
     current_char != char
+  end
+
+  def notify_game_over
+    if check_winner? 'x'
+      notify_observers :x_wins
+    elsif check_winner? 'o'
+      notify_observers :o_wins
+    else
+      notify_observers :tie_game
+    end
   end
 end
