@@ -36,6 +36,11 @@ describe Minimax do
     Minimax.assign_score_to_board(board, 1).should be 0.5
   end
 
+  it "assigns 0.5 to a board that will be tied" do
+    board.place 7
+    Minimax.assign_score_to_board(board, 1).should be 0.5
+  end
+
   it "assigns a positive score to a winning move" do
     Minimax.run(board)[8].should be > 0
   end
