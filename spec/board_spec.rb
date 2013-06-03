@@ -1,4 +1,3 @@
-require_relative 'spec_helper.rb'
 require_relative '../lib/tic_tac_toe_ai/board.rb'
 
 describe Board do
@@ -64,7 +63,11 @@ end
 
   describe 'notifications' do
     it "sends :x_wins when x wins" do
-      place_many [0,1,2], [3,4]
+      board = Board.new ['x','x','x',
+                         'o','o',nil,
+                         nil,nil,nil]
+      board.add_observer observer
+
       observer.should_receive :x_wins
       observer.should_not_receive :o_wins
       observer.should_not_receive :tie_game
@@ -73,7 +76,11 @@ end
     end
 
     it "sends :o_wins when o wins" do
-      place_many [3,4,7,8], [0,1,2]
+      board = Board.new ['o','o','o',
+                         'x','x',nil,
+                         nil,'x','x']
+      board.add_observer observer
+
       observer.should_not_receive :x_wins
       observer.should_receive :o_wins
       observer.should_not_receive :tie_game
@@ -82,7 +89,11 @@ end
     end
 
     it "sends :tie_game when game is tied" do
-      place_many [0,2,3,7,8], [1,4,5,6]
+      board = Board.new ['o','o','x',
+                         'x','x','o',
+                         'o','x','x']
+      board.add_observer observer
+
       observer.should_not_receive :o_wins
       observer.should_not_receive :x_wins
       observer.should_receive :tie_game
@@ -181,7 +192,9 @@ end
     end
 
     it "should be true when the board is full" do
-      place_many [0,2,3,7,8], [1,4,5,6]
+      board = Board.new ['o','o','x',
+                         'x','x','o',
+                         'o','x','x']
       board.game_over?.should be true
     end
 
@@ -231,19 +244,25 @@ end
     end
 
     it "should be true when x has three in a row" do
-      place_many [0,1,2], [7,8]
+      board = Board.new(['x', 'x', 'x',
+                         'o', 'o', nil,
+                         nil, nil, nil])
       board.check_winner?('x').should be true
     end
 
     it "should be true when o has three in a row" do
-      place_many [7,8,4], [0,1,2]
+      board = Board.new ['o','o','o',
+                         'x','x',nil,
+                         nil,'x',nil]
       board.check_winner?('o').should be true
     end
   end
 
   describe '#available_positions' do
     it "should be an empty array for a full board" do
-      place_many [0,2,3,7,8], [1,4,5,6]
+      board = Board.new ['o','o','x',
+                         'x','x','o',
+                         'o','x','x']
       board.available_positions.should eq []
     end
 
