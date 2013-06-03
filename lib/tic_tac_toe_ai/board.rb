@@ -105,9 +105,11 @@ class Board
   end
 
   def check_invalid_inputs(position)
-    notify_observers :restart if restart? position
-    notify_observers :invalid_position if blank? position
-    notify_observers :invalid_position if not_number? position
+    if restart? position
+      notify_observers :restart
+    elsif blank?(position) or not_number?(position)
+      notify_observers :invalid_position
+    end
   end
 
   def out_of_range?(position)
