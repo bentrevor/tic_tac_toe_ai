@@ -1,6 +1,6 @@
 class Minimax
   def self.run(board, depth = 0)
-    scores = Array.new(9, 0)
+    scores = Array.new(9, -2)
 
     board.available_positions.each do |position|
       board.place position
