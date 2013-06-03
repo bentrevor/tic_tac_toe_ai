@@ -37,11 +37,13 @@ class Board
   end
 
   def try_move(player_char, position)
-    check_invalid_inputs position
+    if !game_over?
+      check_invalid_inputs position
 
-    if state_allows_move? player_char, position.to_i
-      place position.to_i
-      update_state
+      if state_allows_move? player_char, position.to_i
+        place position.to_i
+        update_state
+      end
     end
   end
 

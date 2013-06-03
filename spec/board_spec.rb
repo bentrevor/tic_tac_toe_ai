@@ -10,6 +10,14 @@ describe Board do
     board.add_observer observer
   end
 
+  it "doesn't allow illegal configurations" do
+    board = Board.new ['x','x','x',
+                       'o','o',nil,
+                       nil,nil,nil]
+    board.try_move 'o', 5
+    board.spaces[5].should be nil
+  end
+
   it "can add an observer to board.observers" do
     expect {board.add_observer(observer)}.to change{board.observers.length}.by 1
 end
