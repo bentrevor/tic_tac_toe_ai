@@ -8,7 +8,6 @@ class Minimax
       board.spaces[position] = nil
     end
 
-    puts scores
     scores
   end
 
